@@ -26,6 +26,7 @@ class LithiumPage {
     await expect(this.pressureSensorTwo).toBeVisible();
     await expect(this.temperatureSensorTwo).toBeVisible();
     await expect(this.pressureSensorThree).toBeVisible();
+    await this.page.waitForTimeout(2000);
   }
 }
 
