@@ -1,0 +1,45 @@
+name: Run optima tests
+
+on:
+  workflow_dispatch:  # Solo se ejecuta manualmente
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AutoOptima  # 👈 Esto hace que todos los comandos se ejecuten dentro de la carpeta B
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📥 Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: 🧪 Run Playwright tests one by one
+        run: npx playwright test --workers=1
+
+      - name: 📤 Upload HTML report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report
+          path: coder/playwright-report  # 👈 Ruta relativa desde raíz
+          retention-days: 7
+
+      - name: 📤 Upload videos (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: coder/test-results/**/video.webm  # 👈 Ruta relativa desde raíz
+          retention-days: 7
