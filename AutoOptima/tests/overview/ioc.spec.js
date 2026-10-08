@@ -3,7 +3,6 @@ const { MainPage } = require('../../pages/main-page');
 
 describe("[Functional Test] Overview check", () => {
   //Variable declaration
-  let loginPage = null;
   let mainPage = null;
 
   // 1. Describe configuration

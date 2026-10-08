@@ -1,11 +1,12 @@
 const { describe, test } = require("@playwright/test");
 const { SensorDataPage } = require('../../pages/sensor-data-page.js');
+const { SensorConfigPage } = require('../../pages/sensor-config-page.js');
 const { MainPage } = require('../../pages/main-page');
 
 describe("[Functional Test] Overview check", () => {
   //Variable declaration
-  let loginPage = null;
   let sensorPage = null;
+  let sensorConfigPage = null;
   let mainPage = null;
 
   // 1. Describe configuration
@@ -16,6 +17,7 @@ describe("[Functional Test] Overview check", () => {
     await page.goto('');
     sensorPage = new SensorDataPage(page);
     mainPage = new MainPage(page);
+    sensorConfigPage = new SensorConfigPage(page);
   });
 
   // 3. Test implementation
@@ -25,7 +27,7 @@ describe("[Functional Test] Overview check", () => {
 
         await sensorPage.verifySensorDataPageIsLoaded();
         await sensorPage.navigateToConfig();
-        await sensorPage.verifyConfigIsLoaded();
+        await sensorConfigPage.verifyConfigIsLoaded();
     });
   });
 });

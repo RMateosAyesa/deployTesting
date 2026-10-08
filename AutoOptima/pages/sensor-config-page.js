@@ -17,11 +17,19 @@ class SensorConfigPage {
     this.distributionModel = this.page.locator('#distribution-model');
     this.stdDev = this.page.locator('#std-dev');
     this.driftFactor = this.page.locator('#drift-factor');
-
+    this.identityMetaCard = this.page.locator('[data-testid="sensor-config-identity"]');
+    this.baselineModelCard = this.page.locator('[data-testid="sensor-config-baseline"]');
+    this.eventInjectionCard = this.page.locator('[data-testid="sensor-config-event-injections"]');
   }
 
   async navigateToConfig() {
     this.sensorConfigBtn.click();
+  }
+
+  async verifyConfigIsLoaded() {
+    await expect(this.identityMetaCard).toBeVisible();
+    await expect(this.baselineModelCard).toBeVisible();
+    await expect(this.eventInjectionCard).toBeVisible();
   }
 }
 
