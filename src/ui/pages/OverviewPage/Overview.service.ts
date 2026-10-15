@@ -32,25 +32,6 @@ export const overviewPageData: OverviewPageData = {
     'View real-time performance metrics for each host server',
 }
 
-export type OverviewMetricKey = 'cpu' | 'ram' | 'disk' | 'network'
-
-export const OVERVIEW_METRICS: readonly OverviewMetricKey[] = [
-  'cpu',
-  'ram',
-  'disk',
-  'network',
-]
-
-export const DEFAULT_SUBTYPE_BY_METRIC: Record<
-  OverviewMetricKey,
-  string
-> = {
-  cpu: 'cpu_usage_user',
-  ram: 'mem_used_percent',
-  disk: 'disk_used_percent',
-  network: 'net_bytes_recv',
-}
-
 const mockChartData = [
   { time: '00:00', value: 20 },
   { time: '04:00', value: 35 },
@@ -60,22 +41,30 @@ const mockChartData = [
   { time: '20:00', value: 40 },
 ]
 
-// Local demo data for the IOC performance design; no API requests.
-const node01IocCylinders = Array.from({ length: 3 }, (_, cylinderIndex) => ({
-  id: `cylinder-${cylinderIndex + 1}`,
-  title: `cylinder ${cylinderIndex + 1}`,
-  cards: Array.from({ length: 12 }, (_, index): IocServerCardProps => ({
-    dataTestId: `ioc-card-node-01-cylinder-${cylinderIndex + 1}-${index + 1}`,
-    title: index % 3 === 2 ? `Temperature #${index + 1}` : `Pressure Sensor #${index + 1}`,
-    subtitle: '',
-    iconName: index % 3 === 2 ? 'thermometer' : 'speedometer',
+const node01IocCards: IocServerCardProps[] = [
+  {
+    dataTestId: 'ioc-card-node-01-temp',
+    title: 'IOC Temp Server',
+    subtitle: 'Temperature Sensor #1',
+    iconName: 'thermometer',
     metrics: [
-      { label: 'CPU', value: [87, 50, 33][index % 3] },
-      { label: 'Disk', value: [53, 53, 43][index % 3] },
-      { label: 'RAM', value: [39, 80, 53][index % 3] },
+      { label: 'CPU', value: 45 },
+      { label: 'RAM', value: 62 },
+      { label: 'Disk', value: 38 },
     ],
-  })),
-}))
+  },
+  {
+    dataTestId: 'ioc-card-node-01-pressure',
+    title: 'IOC Pressure Server',
+    subtitle: 'Pressure Sensor #2',
+    iconName: 'speedometer',
+    metrics: [
+      { label: 'CPU', value: 72 },
+      { label: 'RAM', value: 55 },
+      { label: 'Disk', value: 81 },
+    ],
+  },
+]
 
 const node02IocCards: IocServerCardProps[] = [
   {
@@ -95,7 +84,7 @@ export const overviewNodes: NodeMetrics[] = [
   {
     id: 'node-01',
     title: 'Host Server — Node 01',
-    iocCylinders: node01IocCylinders,
+    iocServerCards: node01IocCards,
     metrics: [
       {
         metricCardProps: {

@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Card, CardProps } from '../../Atoms/Card'
 import { IconAtom, IconName } from '../../Atoms/Icon'
 import { Text } from '../../Atoms/Text'
+import { CountBadge } from '../../Molecules/CountBadge'
 
 export type LithiumSystemCardVariant = 'standard' | 'valve'
 
@@ -27,6 +28,8 @@ export interface LithiumSystemCardProps extends Omit<CardProps, 'variant' | 'chi
   value?: string | number
   unit?: string
   iconName?: IconName
+  count?: number
+  countItems?: string[]
   metrics?: ValveMetric[]
   children?: React.ReactNode
 }
@@ -49,12 +52,6 @@ const Container = styled(Card)<{ $variant: LithiumSystemCardVariant }>`
     0 6px 40px 0 rgba(0, 0, 0, 0.1),
     0 3px 6px 0 rgba(0, 0, 0, 0.12),
     0 9px 28px 0 rgba(0, 0, 0, 0.05);
-
-  ${({ $variant }) => $variant === 'valve' && `
-    && {
-      background-color: #0D1424;
-    }
-  `}
 `
 
 const Title = styled(Text)`
@@ -121,40 +118,12 @@ const TitleRow = styled.div`
   width: 100%;
 `
 
-const ValvesContainer = styled.div`
-  display: flex;
-  align-items: stretch;
-`
-
-const ValveColumn = styled.div`
-  box-sizing: border-box;
-  min-width: 158px;
-  padding: ${({ theme }) => `0 ${theme.spacing.md}`};
-
-  &:first-child {
-    padding-left: 0;
-  }
-
-  &:last-child {
-    padding-right: 0;
-  }
-
-  & + & {
-    border-left: 1px solid ${({ theme }) => theme.colors.borderMid};
-  }
-`
-
 const MetricsContainer = styled.div`
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   padding-left: 36px;
   gap: ${({ theme }) => theme.spacing.xs};
   width: 146px;
-`
-
-const ValveMetricsContainer = styled(MetricsContainer)`
-  margin-top: ${({ theme }) => theme.spacing.sm};
 `
 
 const MetricRow = styled.div`
@@ -184,6 +153,8 @@ export function LithiumSystemCard({
   value,
   unit,
   iconName = 'engine',
+  count,
+  countItems = [],
   metrics,
   background = 'high',
   padding = 'none',
@@ -191,39 +162,31 @@ export function LithiumSystemCard({
   children,
 }: LithiumSystemCardProps): React.ReactElement {
   if (variant === 'valve') {
-    const valveSensors = [1, 2].map((valveNumber) => ({
-      title: `Valve ${valveNumber} sensors`,
-      metrics: metrics ?? [],
-    }))
-
     return (
       <Container $variant={variant} background={background} padding={padding} className={className}>
-        <ValvesContainer>
-          {valveSensors.map((valve) => (
-            <ValveColumn key={valve.title}>
-              <TitleRow>
-                <ValveIconContainer aria-hidden="true">
-                  <IconAtom name={iconName} size="m" color="valve" />
-                </ValveIconContainer>
-                <Title variant="info" as="h5">{valve.title}</Title>
-              </TitleRow>
-              {valve.metrics.length > 0 && (
-                <ValveMetricsContainer>
-                  {valve.metrics.map((metric) => (
-                    <MetricRow key={metric.label}>
-                      <MetricLabel>{metric.label}</MetricLabel>
-                      {metric.value !== '' && (
-                        <MetricValue $color={getValueStyles(metric.value).color} $weight={getValueStyles(metric.value).weight}>
-                          {metric.value}
-                        </MetricValue>
-                      )}
-                    </MetricRow>
-                  ))}
-                </ValveMetricsContainer>
-              )}
-            </ValveColumn>
-          ))}
-        </ValvesContainer>
+        <TitleRow>
+          <ValveIconContainer aria-hidden="true">
+            <IconAtom name={iconName} size="m" color="valve" />
+          </ValveIconContainer>
+          <Title variant="info" as="h5">{title}</Title>          
+          {count !== undefined && (
+            <CountBadge count={count} items={countItems} color='#07FFB9'/>
+          )}
+        </TitleRow>
+        {metrics && metrics.length > 0 && (
+          <MetricsContainer>
+            {metrics.map((metric) => (
+              <MetricRow key={metric.label}>
+                <MetricLabel>{metric.label}</MetricLabel>
+                {metric.value && (
+                  <MetricValue $color={getValueStyles(metric.value).color} $weight={getValueStyles(metric.value).weight}>
+                    {metric.value}
+                  </MetricValue>
+                )}
+              </MetricRow>
+            ))}
+          </MetricsContainer>
+        )}
         {children && <MetricsContainer>{children}</MetricsContainer>}
       </Container>
     )
