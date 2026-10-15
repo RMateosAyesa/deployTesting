@@ -16,8 +16,7 @@ const meta: Meta<typeof LithiumSystemCard> = {
       options: ['standard', 'valve'],
     },
     iconName: { control: 'text' },
-    count: { control: 'number' },
-    countItems: { control: 'object' },
+    metrics: { control: 'object' },
   },
   decorators: [
     (Story) => (
@@ -39,18 +38,18 @@ export const Default: Story = {
   },
 }
 
+const valveMetrics = [
+  { label: 'Position:', value: '3 voltios' },
+  { label: 'Leakage:', value: 'False' },
+  { label: 'Status:', value: 'Open' },
+  { label: 'Fin carrera:', value: 'False' },
+]
+
 export const Valve: Story = {
   args: {
     variant: 'valve',
     title: 'Valve sensors',
     iconName: 'engine',
-    count: 4,
-    countItems: ['Position', 'Leakage', 'Status', 'Fin carrera'],
-    metrics: [
-      { label: 'Position:', value: '3 voltios' },
-      { label: 'Leakage:', value: 'False' },
-      { label: 'Status:', value: 'Open' },
-      { label: 'Fin carrera:', value: 'False' },
-    ],
+    metrics: valveMetrics,
   },
 }
