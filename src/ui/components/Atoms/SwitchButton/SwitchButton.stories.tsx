@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react'
 import { SwitchButton } from './SwitchButton'
 import styled, { ThemeProvider } from 'styled-components'
 import { theme } from '../../../../styles/theme'

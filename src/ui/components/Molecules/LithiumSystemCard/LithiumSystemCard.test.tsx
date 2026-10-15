@@ -23,20 +23,19 @@ describe('Molecules/LithiumSystemCard', () => {
   })
 
   describe('valve variant', () => {
-    it('repeats the supplied metrics in two valve columns', () => {
+    it('renders title with icon and count badge', () => {
       renderWithTheme(
         <LithiumSystemCard
           variant="valve"
-          title="Valve sensors"
+          title="Valve A"
           iconName="gear"
-          metrics={[{ label: 'Status:', value: 'Open' }]}
+          count={3}
+          countItems={['Metric 1', 'Metric 2']}
         />
       )
 
-      expect(screen.getByRole('heading', { name: 'Valve 1 sensors' })).toBeInTheDocument()
-      expect(screen.getByRole('heading', { name: 'Valve 2 sensors' })).toBeInTheDocument()
-      expect(screen.getAllByText('Status:')).toHaveLength(2)
-      expect(screen.getAllByText('Open')).toHaveLength(2)
+      expect(screen.getByRole('heading', { name: 'Valve A' })).toBeInTheDocument()
+      expect(screen.getByText('3')).toBeInTheDocument()
     })
 
     it('renders children metrics', () => {
@@ -44,6 +43,8 @@ describe('Molecules/LithiumSystemCard', () => {
         <LithiumSystemCard
           variant="valve"
           title="Valve B"
+          count={2}
+          countItems={['CPU', 'RAM']}
         >
           <Text variant="bodyMedium">Metric A</Text>
           <Text variant="bodyMedium">Metric B</Text>

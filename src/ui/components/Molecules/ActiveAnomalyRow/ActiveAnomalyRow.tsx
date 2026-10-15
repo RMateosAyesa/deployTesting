@@ -6,7 +6,7 @@ import { Text } from '../../Atoms/Text'
 import { Button } from '../../Atoms/Button'
 import { Badge, BadgeVariant } from '../../Atoms/Badge'
 import { theme } from '../../../../styles/theme'
-import { AnomalyOptionType, anomalyConfig } from '../AnomalyOption/anomaly-option.config'
+import { AnomalyOptionType, anomalyConfig } from '../AnomalyOption/AnomalyOption'
 
 export type AnomalyStatus = 'running' | 'scheduled'
 
