@@ -4,6 +4,7 @@ import { theme } from '../../../styles/theme'
 import { LithiumSystemPage } from './index'
 import { getLithiumSystemData, getCylinderPreset, CYLINDER_COUNT } from './lithiumSystem.service'
 import type { LithiumSystemData } from './lithiumSystem.service'
+import { CYLINDER_PRESETS, FIXED_CARDS, FIXED_LINES } from './lithiumSystem.config'
 import { LithiumSystemTemplate } from '../../components/Templates/LithiumSystemTemplate'
 
 function renderWithTheme(ui: React.ReactElement) {
@@ -80,7 +81,6 @@ describe('Pages/LithiumSystemPage', () => {
         cards: [
           {
             id: 'v1', title: 'Valve sensors', variant: 'valve', iconName: 'engine',
-            count: 2, countItems: ['Pos', 'Leak'],
             metrics: [
               { label: 'Position', value: 'Open' },
               { label: 'Leakage', value: 'False' },
@@ -95,9 +95,10 @@ describe('Pages/LithiumSystemPage', () => {
       renderWithTheme(<LithiumSystemPage onFetchData={onFetchData} />)
       await flushMicrotasks()
 
-      expect(screen.getByText('Valve sensors')).toBeInTheDocument()
-      expect(screen.getByText('Position')).toBeInTheDocument()
-      expect(screen.getByText('Leakage')).toBeInTheDocument()
+      expect(screen.getByText('Valve 1 sensors')).toBeInTheDocument()
+      expect(screen.getByText('Valve 2 sensors')).toBeInTheDocument()
+      expect(screen.getAllByText('Position')).toHaveLength(2)
+      expect(screen.getAllByText('Leakage')).toHaveLength(2)
     })
   })
 
@@ -191,9 +192,23 @@ describe('Pages/LithiumSystemPage', () => {
 
     it('getLithiumSystemData returns expected data for cylinder 0', async () => {
       const data = await getLithiumSystemData(0)
-      expect(data.cards.length).toBeGreaterThan(0)
-      expect(data.cards.some(c => c.title === 'Pressure Sensor #1')).toBe(true)
-      expect(data.cards.some(c => c.title === 'Temperature Sen. #2')).toBe(true)
+      expect(data.cards).toEqual([...FIXED_CARDS, ...CYLINDER_PRESETS[0].cards])
+      expect(data.lines).toEqual([...FIXED_LINES, ...CYLINDER_PRESETS[0].lines])
+    })
+
+    it('getLithiumSystemData uses the requested cylinder preset', async () => {
+      const data = await getLithiumSystemData(2)
+
+      expect(data.cards).toEqual([...FIXED_CARDS, ...CYLINDER_PRESETS[2].cards])
+      expect(data.lines).toEqual([...FIXED_LINES, ...CYLINDER_PRESETS[2].lines])
+    })
+
+    it('falls back to cylinder 0 when the requested preset does not exist', async () => {
+      const data = await getLithiumSystemData(CYLINDER_COUNT)
+
+      expect(data.cards).toEqual([...FIXED_CARDS, ...CYLINDER_PRESETS[0].cards])
+      expect(data.lines).toEqual([...FIXED_LINES, ...CYLINDER_PRESETS[0].lines])
+      expect(getCylinderPreset(CYLINDER_COUNT)).toBe(CYLINDER_PRESETS[0])
     })
 
     it('each cylinder preset has different card Y positions', () => {
@@ -204,5 +219,18 @@ describe('Pages/LithiumSystemPage', () => {
       const v1YPositions = [p0, p1, p2].map(p => p.cards.find(c => c.id === 'v1')?.y)
       expect(new Set(v1YPositions).size).toBe(3)
     })
+
+    it('connects the valve card to a different lithium cylinder in each preset', () => {
+      const valveTargets = CYLINDER_PRESETS.map((preset) => {
+        expect(preset.cards.filter((card) => card.id === 'v1')).toHaveLength(1)
+        expect(preset.lines.filter((line) => line.cardId === 'v1')).toHaveLength(1)
+
+        const valveLine = preset.lines.find((line) => line.cardId === 'v1')
+        return `${valveLine?.x2},${valveLine?.y2}`
+      })
+
+      expect(new Set(valveTargets).size).toBe(CYLINDER_COUNT)
+    })
+
   })
 })

@@ -14,16 +14,22 @@ export type IocServerItem = {
 }
 
 export interface IocServerCardProps extends CardProps {
+  compact?: boolean
   title: string
   subtitle: string
   iconName: IconName
   metrics: IocServerItem[]
 }
 
-const Container = styled(Card)`
+const Container = styled(Card)<{ $compact?: boolean }>`
+  ${({ $compact }) => $compact && `
+    padding: 10px;
+    min-width: 0;
+    & p { font-size: 10px; }
+  `}
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: ${({ theme, $compact }) => $compact ? theme.spacing.sm : theme.spacing.md};
 
   border: 2px solid transparent;
   transition: border 0.2s ease;
@@ -40,28 +46,30 @@ const Header = styled.div`
 `
 
 const HeaderText = styled.div`
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   gap: 4px;
 `
 
-const MetricsContainer = styled.div`
+const MetricsContainer = styled.div<{ $compact: boolean }>`
   background: ${({ theme }) => theme.colors.backgroundHigh};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   padding: ${({ theme }) => theme.spacing.sm};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: ${({ theme, $compact }) => $compact ? '4px' : theme.spacing.sm};
 `
 
-const MetricRow = styled.div`
+const MetricRow = styled.div<{ $compact: boolean }>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: ${({ theme, $compact }) => $compact ? '4px' : theme.spacing.sm};
 `
 
-const Label = styled(Text)`
-  min-width: 40px;
+const Label = styled(Text)<{ $compact: boolean }>`
+  min-width: ${({ $compact }) => $compact ? '24px' : '40px'};
   color: ${({ theme }) => theme.colors.contentMid};
 `
 
@@ -71,9 +79,11 @@ const Value = styled(Text)`
 
 const ProgressWrapper = styled.div`
   flex: 1;
+  min-width: 0;
 `
 
 export function IocServerCard({
+  compact = false,
   title,
   subtitle,
   iconName,
@@ -85,34 +95,39 @@ export function IocServerCard({
 }: IocServerCardProps): React.ReactElement {
   return (
     <Container
+      $compact={compact}
       variant={variant}
       background={background}
       padding={padding}
       {...props}
     >
       <Header>
-        <IconAtom name={iconName} size="xl" color="primary" />
+        <IconAtom name={iconName} size={compact ? 'm' : 'xl'} color="primary" />
 
         <HeaderText>
           <Text variant="bodyMediumBold" color={theme.colors.textColor}>
             {title}
           </Text>
 
-          <Text variant="bodyMedium" color={theme.colors.contentMid}>
+          {subtitle && <Text variant="bodyMedium" color={theme.colors.contentMid}>
             {subtitle}
-          </Text>
+          </Text>}
         </HeaderText>
       </Header>
 
-      <MetricsContainer>
+      <MetricsContainer $compact={compact}>
         {metrics.map(metric => (
-          <MetricRow key={metric.label}>
-            <Label variant="bodyMediumBold">
+          <MetricRow key={metric.label} $compact={compact}>
+            <Label variant="bodyMediumBold" $compact={compact}>
               {metric.label}
             </Label>
 
             <ProgressWrapper>
-              <Progress percent={metric.value} colorMode="range" />
+              <Progress
+                percent={metric.value}
+                colorMode="range"
+                {...(compact ? { showInfo: false, size: 'small' as const, strokeWidth: 3, trailColor: theme.colors.backgroundLowest } : {})}
+              />
             </ProgressWrapper>
 
             <Value variant="bodyMediumBold">

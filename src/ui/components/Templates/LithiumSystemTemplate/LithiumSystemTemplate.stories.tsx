@@ -1,9 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { theme } from '../../../../styles/theme'
+import {
+  CYLINDER_PRESETS,
+  FIXED_CARDS,
+  FIXED_LINES,
+  SIMULATION_FIXED_CARDS,
+  SIMULATION_FIXED_LINES,
+} from '../../../pages/lithium-system/lithiumSystem.config'
 import { LithiumSystemTemplate } from './LithiumSystemTemplate'
-import type { CardData, LineData } from './LithiumSystemTemplate'
 
 const meta: Meta<typeof LithiumSystemTemplate> = {
   title: 'Templates/LithiumSystemTemplate',
@@ -19,84 +25,38 @@ const meta: Meta<typeof LithiumSystemTemplate> = {
 }
 
 export default meta
-
 type Story = StoryObj<typeof LithiumSystemTemplate>
 
 const sidebar = {
   items: [
+    { id: 'overview', label: 'Overview', iconName: 'globe' as const, badge: '' },
+    { id: 'lithium', label: 'Lithium System', iconName: 'cube' as const, badge: '' },
     {
-      id: 'overview',
-      label: 'Overview',
-      iconName: 'globe' as const,
-      badge: '',
-    },
-    {
-      id: 'lithium',
-      label: 'Lithium System',
-      iconName: 'cube' as const,
-      badge: '',
-    },
-    {
-      id: 'datalab',
-      label: 'Data Lab',
-      iconName: 'flask' as const,
-      badge: '',
+      id: 'datalab', label: 'Data Lab', iconName: 'flask' as const, badge: '',
       children: [
-        {
-          id: 'anomaly',
-          label: 'Anomaly scenarios',
-          iconName: 'arrowRight' as const,
-          badge: '',
-        },
-        {
-          id: 'sensor',
-          label: 'Sensor data config',
-          iconName: 'arrowRight' as const,
-          badge: '',
-        },
+        { id: 'anomaly', label: 'Anomaly scenarios', iconName: 'arrowRight' as const, badge: '' },
+        { id: 'sensor', label: 'Sensor data config', iconName: 'arrowRight' as const, badge: '' },
       ],
     },
   ],
   activeId: 'lithium',
 }
 
-const fixedCards = [
-  { id: 'p1', title: 'Pressure Sensor #1', value: 4.5, unit: 'kPa', x: 0.30, y: 0.07 },
-  { id: 'f1', title: 'Flowmeter Sensor #1', value: 120, unit: 'l/min', x: 0.6, y: 0.07 },
-  { id: 'e1', title: 'Electrochemical Hydrogen Sensor #1', value: 0.8, unit: 'ppm', x: 0.78, y: 0.88 },
-]
-
-const dynamicCards = [
-  { id: 't2', title: 'Temperature Sen. #2', value: 251, unit: 'Cº', x: 0.10, y: 0.26 },
-  { id: 'v1', title: 'Valve sensors', variant: 'valve' as const, iconName: 'engine' as const, count: 4, countItems: ['Position', 'Leakage', 'Status', 'Fin carrera'], metrics: [{ label: 'Position', value: '3 voltios' }, { label: 'Leakage', value: 'False' }, { label: 'Status', value: 'Open' }, { label: 'Fin carrera', value: 'False' }], x: 0.6, y: 0.295 },
-  { id: 'p2', title: 'Pressure Sensor #2', value: 3.2, unit: 'kPa', x: 0.25, y: 0.33 },
-  { id: 't1', title: 'Temperature Sen. #1', value: 180, unit: 'Cº', x: 0.25, y: 0.57 },
-  { id: 'p3', title: 'Pressure Sensor #3', value: 5.1, unit: 'kPa', x: 0.37, y: 0.9 },
-]
-
-const defaultLines: LineData[] = [
-  { cardId: 'p1', x2: 0.45, y2: 0.07 },
-  { cardId: 'f1', x2: 0.48, y2: 0.07 },
-  { cardId: 'e1', x2: 0.78, y2: 0.46 },
-  { cardId: 't2', x2: 0.38, y2: 0.26 },
-  { cardId: 'v1', x2: 0.394, y2: 0.295 },
-  { cardId: 'p2', x2: 0.38, y2: 0.33 },
-  { cardId: 't1', x2: 0.35, y2: 0.57 },
-  { cardId: 'p3', x2: 0.37, y2: 0.55 },
-]
+const defaultPreset = CYLINDER_PRESETS[0]
+const defaultCylinderIndex = 0
 
 export const Default: Story = {
   args: {
     sidebar,
-    cards: [...fixedCards, ...dynamicCards] as CardData[],
-    lines: defaultLines,
+    cards: [...FIXED_CARDS, ...defaultPreset.cards],
+    lines: [...FIXED_LINES, ...defaultPreset.lines],
   },
 }
 
 export const WithLines: Story = {
   args: {
     sidebar,
-    cards: [...fixedCards, ...dynamicCards] as CardData[],
+    cards: [...FIXED_CARDS, ...defaultPreset.cards],
     lines: [
       { cardId: 'p1', x2: 0.30, y2: 0.07 },
       { cardId: 'p2', x2: 0.20, y2: 0.43 },
@@ -106,74 +66,8 @@ export const WithLines: Story = {
 }
 
 export const OnlyFixed: Story = {
-  args: {
-    sidebar,
-    cards: fixedCards,
-  },
+  args: { sidebar, cards: FIXED_CARDS },
 }
-
-const fixedPresetCards: CardData[] = [
-  { id: 'p1', title: 'Pressure Sensor #1', value: 4.5, unit: 'kPa', x: 0.30, y: 0.07 },
-  { id: 'f1', title: 'Flowmeter Sensor #1', value: 120, unit: 'l/min', x: 0.6, y: 0.07 },
-  { id: 'e1', title: 'Electrochemical Hydrogen Sensor #1', value: 0.8, unit: 'ppm', x: 0.8, y: 0.83 },
-]
-
-const fixedPresetLines: LineData[] = [
-  { cardId: 'p1', x2: 0.45, y2: 0.07 },
-  { cardId: 'f1', x2: 0.48, y2: 0.07 },
-  { cardId: 'e1', x2: 0.8, y2: 0.43 },
-]
-
-const presets = [
-  {
-    cards: [
-      { id: 't2', title: 'Temperature Sen. #2', value: 251, unit: 'Cº', x: 0.10, y: 0.26 },
-      { id: 'v1', title: 'Valve sensors', variant: 'valve' as const, iconName: 'engine' as const, count: 4, countItems: ['Position', 'Leakage', 'Status', 'Fin carrera'], metrics: [{ label: 'Position', value: '3 voltios' }, { label: 'Leakage', value: 'False' }, { label: 'Status', value: 'Open' }, { label: 'Fin carrera', value: 'False' }], x: 0.60, y: 0.295 },
-      { id: 'p2', title: 'Pressure Sensor #2', value: 3.2, unit: 'kPa', x: 0.25, y: 0.33 },
-      { id: 't1', title: 'Temperature Sen. #1', value: 180, unit: 'Cº', x: 0.25, y: 0.57 },
-      { id: 'p3', title: 'Pressure Sensor #3', value: 5.1, unit: 'kPa', x: 0.37, y: 0.9 },
-    ],
-    lines: [
-      { cardId: 't2', x2: 0.38, y2: 0.26 },
-      { cardId: 'v1', x2: 0.394, y2: 0.295 },
-      { cardId: 'p2', x2: 0.38, y2: 0.33 },
-      { cardId: 't1', x2: 0.35, y2: 0.57 },
-      { cardId: 'p3', x2: 0.37, y2: 0.55 },
-    ],
-  },
-  {
-    cards: [
-      { id: 't2', title: 'Temperature Sen. #2', value: 251, unit: 'Cº', x: 0.10, y: 0.35 },
-      { id: 'v1', title: 'Valve sensors', variant: 'valve' as const, iconName: 'engine' as const, count: 4, countItems: ['Position', 'Leakage', 'Status', 'Fin carrera'], metrics: [{ label: 'Position', value: '3 voltios' }, { label: 'Leakage', value: 'False' }, { label: 'Status', value: 'Open' }, { label: 'Fin carrera', value: 'False' }], x: 0.65, y: 0.385 },
-      { id: 'p2', title: 'Pressure Sensor #2', value: 3.2, unit: 'kPa', x: 0.25, y: 0.42 },
-      { id: 't1', title: 'Temperature Sen. #1', value: 180, unit: 'Cº', x: 0.25, y: 0.66 },
-      { id: 'p3', title: 'Pressure Sensor #3', value: 5.1, unit: 'kPa', x: 0.408, y: 0.9 },
-    ],
-    lines: [
-      { cardId: 't2', x2: 0.464, y2: 0.35 },
-      { cardId: 'v1', x2: 0.478, y2: 0.385 },
-      { cardId: 'p2', x2: 0.464, y2: 0.42 },
-      { cardId: 't1', x2: 0.43, y2: 0.66 },
-      { cardId: 'p3', x2: 0.408, y2: 0.685 },
-    ],
-  },
-  {
-    cards: [
-      { id: 't2', title: 'Temperature Sen. #2', value: 251, unit: 'Cº', x: 0.10, y: 0.44 },
-      { id: 'v1', title: 'Valve sensors', variant: 'valve' as const, iconName: 'engine' as const, count: 4, countItems: ['Position', 'Leakage', 'Status', 'Fin carrera'], metrics: [{ label: 'Position', value: '3 voltios' }, { label: 'Leakage', value: 'False' }, { label: 'Status', value: 'Open' }, { label: 'Fin carrera', value: 'False' }], x: 0.566, y: 0.25 },
-      { id: 'p2', title: 'Pressure Sensor #2', value: 3.2, unit: 'kPa', x: 0.25, y: 0.51 },
-      { id: 't1', title: 'Temperature Sen. #1', value: 180, unit: 'Cº', x: 0.49, y: 0.9 },
-      { id: 'p3', title: 'Pressure Sensor #3', value: 5.1, unit: 'kPa', x: 0.67, y: 0.76 },
-    ],
-    lines: [
-      { cardId: 't2', x2: 0.552, y2: 0.44 },
-      { cardId: 'v1', x2: 0.566, y2: 0.475 },
-      { cardId: 'p2', x2: 0.552, y2: 0.51 },
-      { cardId: 't1', x2: 0.49, y2: 0.785 },
-      { cardId: 'p3', x2: 0.52, y2: 0.76 },
-    ],
-  },
-]
 
 const SimLayer = styled.div<{ $visible: boolean }>`
   position: absolute;
@@ -217,33 +111,33 @@ const CtrlBtn = styled.button<{ $active?: boolean }>`
 `
 
 function SimulationInner() {
-  const [active, setActive] = useState(0)
-  const [auto, setAuto] = useState(true)
+  const [active, setActive] = useState(defaultCylinderIndex)
+  const [auto, setAuto] = useState(false)
 
   useEffect(() => {
     if (!auto) return
-    const t = setInterval(() => setActive((p) => (p + 1) % presets.length), 5000)
-    return () => clearInterval(t)
+    const timer = setInterval(() => setActive((current) => (current + 1) % CYLINDER_PRESETS.length), 5000)
+    return () => clearInterval(timer)
   }, [auto])
 
   return (
     <SimRoot>
-      {presets.map((preset, i) => (
-        <SimLayer key={i} $visible={i === active}>
+      {CYLINDER_PRESETS.map((preset, index) => (
+        <SimLayer key={index} $visible={index === active}>
           <LithiumSystemTemplate
             sidebar={sidebar}
-            cards={[...fixedPresetCards, ...preset.cards] as CardData[]}
-            lines={[...fixedPresetLines, ...preset.lines]}
+            cards={[...SIMULATION_FIXED_CARDS, ...preset.cards]}
+            lines={[...SIMULATION_FIXED_LINES, ...preset.lines]}
           />
         </SimLayer>
       ))}
       <Controls>
-        {presets.map((_, i) => (
-          <CtrlBtn key={i} $active={i === active} onClick={() => { setActive(i); setAuto(false) }}>
-            {i + 1}
+        {CYLINDER_PRESETS.map((_, index) => (
+          <CtrlBtn key={index} $active={index === active} onClick={() => { setActive(index); setAuto(false) }}>
+            {index + 1}
           </CtrlBtn>
         ))}
-        <CtrlBtn onClick={() => setAuto((a) => !a)}>
+        <CtrlBtn onClick={() => setAuto((current) => !current)}>
           {auto ? '⏸ Stop' : '▶ Auto'}
         </CtrlBtn>
       </Controls>

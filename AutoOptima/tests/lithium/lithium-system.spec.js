@@ -4,6 +4,7 @@ const { MainPage } = require('../../pages/main-page');
 
 describe("[Functional Test] Overview check", () => {
   //Variable declaration
+  let loginPage = null;
   let lithiumPage = null;
   let mainPage = null;
 

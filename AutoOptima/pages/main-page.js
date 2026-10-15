@@ -21,17 +21,11 @@ class MainPage {
     this.sensorDataBtn = this.page.locator('[data-testid="nav-item-sensor-data-config"]');
     this.iocTempServerCard = this.page.locator('[data-testid="ioc-card-node-01-temp"]');
     this.iocPressureServerCard = this.page.locator('[data-testid="ioc-card-node-01-pressure"]');
-    this.dataSensorBtn = this.page.locator('[data-testid="nav-item-sensor-data-config"]');
     this.showIocBtn = this.page.locator('.fXfUpk').first();
   }
 
   async navigateToLithiumSystem() {
     await this.lithiumSystemBtn.click();
-    await this.page.waitForTimeout(3000);
-  }
-
-  async navigateToDataSensor() {
-    await this.dataSensorBtn.click();
   }
 
   async verifyIocPanel() {

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import styled, { ThemeProvider } from 'styled-components'
 import { Divider } from './Divider'
 import { theme } from '../../../../styles/theme'

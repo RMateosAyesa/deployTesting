@@ -11,47 +11,55 @@ const IMAGE_ASPECT = IMAGE_NATURAL_WIDTH / IMAGE_NATURAL_HEIGHT
 
 const CARD_WIDTH = 159
 const CARD_HEIGHT = 72
-const CARD_HALF_W = CARD_WIDTH / 2
-const CARD_HALF_H = CARD_HEIGHT / 2
 
-function getCardEdgePoint(cx: number, cy: number, tx: number, ty: number): { x: number; y: number } {
+function getCardEdgePoint(
+  cx: number,
+  cy: number,
+  tx: number,
+  ty: number,
+  cardWidth: number,
+  cardHeight: number
+): { x: number; y: number } {
   const dx = tx - cx
   const dy = ty - cy
   if (dx === 0 && dy === 0) return { x: cx, y: cy }
+
+  const cardHalfWidth = cardWidth / 2
+  const cardHalfHeight = cardHeight / 2
 
   let bestT = Infinity
   let bestX = cx
   let bestY = cy
 
   if (dx < 0) {
-    const t = -CARD_HALF_W / dx
+    const t = -cardHalfWidth / dx
     const y = cy + t * dy
-    if (t >= 0 && t < bestT && Math.abs(y - cy) <= CARD_HALF_H) {
-      bestT = t; bestX = cx - CARD_HALF_W; bestY = y
+    if (t >= 0 && t < bestT && Math.abs(y - cy) <= cardHalfHeight) {
+      bestT = t; bestX = cx - cardHalfWidth; bestY = y
     }
   }
 
   if (dx > 0) {
-    const t = CARD_HALF_W / dx
+    const t = cardHalfWidth / dx
     const y = cy + t * dy
-    if (t >= 0 && t < bestT && Math.abs(y - cy) <= CARD_HALF_H) {
-      bestT = t; bestX = cx + CARD_HALF_W; bestY = y
+    if (t >= 0 && t < bestT && Math.abs(y - cy) <= cardHalfHeight) {
+      bestT = t; bestX = cx + cardHalfWidth; bestY = y
     }
   }
 
   if (dy < 0) {
-    const t = -CARD_HALF_H / dy
+    const t = -cardHalfHeight / dy
     const x = cx + t * dx
-    if (t >= 0 && t < bestT && Math.abs(x - cx) <= CARD_HALF_W) {
-      bestT = t; bestX = x; bestY = cy - CARD_HALF_H
+    if (t >= 0 && t < bestT && Math.abs(x - cx) <= cardHalfWidth) {
+      bestT = t; bestX = x; bestY = cy - cardHalfHeight
     }
   }
 
   if (dy > 0) {
-    const t = CARD_HALF_H / dy
+    const t = cardHalfHeight / dy
     const x = cx + t * dx
-    if (t >= 0 && t < bestT && Math.abs(x - cx) <= CARD_HALF_W) {
-      bestT = t; bestX = x; bestY = cy + CARD_HALF_H
+    if (t >= 0 && t < bestT && Math.abs(x - cx) <= cardHalfWidth) {
+      bestT = t; bestX = x; bestY = cy + cardHalfHeight
     }
   }
 
@@ -98,8 +106,6 @@ export interface CardData {
   y: number
   variant?: 'standard' | 'valve'
   iconName?: IconName
-  count?: number
-  countItems?: string[]
   metrics?: ValveMetric[]
 }
 
@@ -118,8 +124,10 @@ export interface LithiumSystemTemplateProps extends Omit<BaseTemplateProps, 'tit
 
 export function LithiumSystemTemplate({ sidebar, cards, lines }: LithiumSystemTemplateProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef(new Map<string, HTMLDivElement>())
   const theme = useTheme()
   const [imageRect, setImageRect] = useState({ left: 0, top: 0, width: 0, height: 0 })
+  const [cardSizes, setCardSizes] = useState<Record<string, { width: number; height: number }>>({})
 
   useLayoutEffect(() => {
     const update = () => {
@@ -148,6 +156,36 @@ export function LithiumSystemTemplate({ sidebar, cards, lines }: LithiumSystemTe
     return () => window.removeEventListener('resize', update)
   }, [])
 
+  useLayoutEffect(() => {
+    const updateCardSizes = () => {
+      const nextSizes: Record<string, { width: number; height: number }> = {}
+
+      cardRefs.current.forEach((element, id) => {
+        const { width, height } = element.getBoundingClientRect()
+        if (width > 0 && height > 0) nextSizes[id] = { width, height }
+      })
+
+      setCardSizes((currentSizes) => {
+        const ids = Object.keys(nextSizes)
+        const hasChanged = ids.length !== Object.keys(currentSizes).length
+          || ids.some((id) => (
+            currentSizes[id]?.width !== nextSizes[id].width
+            || currentSizes[id]?.height !== nextSizes[id].height
+          ))
+
+        return hasChanged ? nextSizes : currentSizes
+      })
+    }
+
+    updateCardSizes()
+
+    if (typeof ResizeObserver === 'undefined') return
+
+    const observer = new ResizeObserver(updateCardSizes)
+    cardRefs.current.forEach((element) => observer.observe(element))
+    return () => observer.disconnect()
+  }, [cards])
+
   const resolvedLines: { cardId: string; x1: number; y1: number; x2: number; y2: number }[] =
     lines?.map((l) => {
       const targetX = imageRect.left + l.x2 * imageRect.width
@@ -162,7 +200,15 @@ export function LithiumSystemTemplate({ sidebar, cards, lines }: LithiumSystemTe
         if (card) {
           const cx = imageRect.left + card.x * imageRect.width
           const cy = imageRect.top + card.y * imageRect.height
-          const edge = getCardEdgePoint(cx, cy, targetX, targetY)
+          const cardSize = cardSizes[card.id]
+          const edge = getCardEdgePoint(
+            cx,
+            cy,
+            targetX,
+            targetY,
+            cardSize?.width ?? CARD_WIDTH,
+            cardSize?.height ?? CARD_HEIGHT
+          )
           x1 = edge.x
           y1 = edge.y
         } else {
@@ -188,6 +234,10 @@ export function LithiumSystemTemplate({ sidebar, cards, lines }: LithiumSystemTe
           return (
             <CardWrapper
               key={card.id}
+              ref={(element) => {
+                if (element) cardRefs.current.set(card.id, element)
+                else cardRefs.current.delete(card.id)
+              }}
               data-testid={`sensor-card-${card.id}`}
               style={{
                 left: cx,
@@ -201,8 +251,6 @@ export function LithiumSystemTemplate({ sidebar, cards, lines }: LithiumSystemTe
                 unit={card.unit}
                 variant={card.variant}
                 iconName={card.iconName}
-                count={card.count}
-                countItems={card.countItems}
                 metrics={card.metrics}
               />
             </CardWrapper>
@@ -220,22 +268,45 @@ export function LithiumSystemTemplate({ sidebar, cards, lines }: LithiumSystemTe
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <filter id="valve-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="expanded" />
+              <feGaussianBlur in="expanded" stdDeviation="4.55" result="blur" />
+              <feFlood floodColor={theme.colors.anomalyFlag} floodOpacity="0.4" result="color" />
+              <feComposite in="color" in2="blur" operator="in" result="shadow" />
+              <feMerge>
+                <feMergeNode in="shadow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
-          {resolvedLines.map((line) => (
-            <g key={line.cardId} data-card-id={line.cardId}>
+          {resolvedLines.map((line) => {
+            const isValveLine = cards.find((card) => card.id === line.cardId)?.variant === 'valve'
+            const lineColor = isValveLine ? theme.colors.anomalyFlag : theme.colors.semanticPrimary
+
+            return (
+              <g key={line.cardId} data-card-id={line.cardId}>
               <line
                 x1={line.x1}
                 y1={line.y1}
                 x2={line.x2}
                 y2={line.y2}
-                stroke={theme.colors.semanticPrimary}
+                stroke={lineColor}
                 strokeWidth={2}
                 strokeDasharray="1,1"
               />
-              <circle cx={line.x1} cy={line.y1} r={2} fill={theme.colors.semanticPrimary} />
-              <circle cx={line.x2} cy={line.y2} r={4} fill={theme.colors.semanticPrimary} stroke="#000000" strokeWidth={2} filter="url(#glow)" />
-            </g>
-          ))}
+                <circle cx={line.x1} cy={line.y1} r={2} fill={lineColor} />
+                <circle
+                  cx={line.x2}
+                  cy={line.y2}
+                  r={4}
+                  fill={lineColor}
+                  stroke="#000000"
+                  strokeWidth={2}
+                  filter={isValveLine ? 'url(#valve-glow)' : 'url(#glow)'}
+                />
+              </g>
+            )
+          })}
         </LinesSvg>
       </Container>
     </BaseTemplate>
